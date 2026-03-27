@@ -58,7 +58,7 @@ fi
 echo "[phase2] Installing NVIDIA container toolkit..."
 if ! dpkg -s nvidia-container-toolkit >/dev/null 2>&1; then
   curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey \
-    | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+    | gpg --dearmor --yes -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
 
   curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list \
     | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' \
@@ -115,7 +115,7 @@ fi
 chmod +x "${INSTALL_SCRIPT}"
 
 if [[ "${INSTALL_SCRIPT}" == *.run ]]; then
-  "${INSTALL_SCRIPT}" --mode unattended || "${INSTALL_SCRIPT}"
+  "${INSTALL_SCRIPT}" --mode unattended || printf '\nY\nEn\n' | "${INSTALL_SCRIPT}"
 else
   bash "${INSTALL_SCRIPT}"
 fi

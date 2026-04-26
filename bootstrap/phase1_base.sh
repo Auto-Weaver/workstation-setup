@@ -36,6 +36,32 @@ if [[ "${ID:-}" != "ubuntu" ]]; then
   exit 1
 fi
 
+echo "[phase1] Disabling unattended kernel + driver upgrades..."
+# Auto-upgrades silently bumped this box's kernel from 6.8 to 6.17 once already,
+# leaving the installed nvidia-driver-550 modules orphaned. Pin kernel + nvidia
+# packages so deploy stays reproducible until a human explicitly upgrades.
+apt-mark hold \
+  linux-image-generic \
+  linux-headers-generic \
+  linux-image-"$(uname -r)" \
+  linux-headers-"$(uname -r)" \
+  || true
+
+# Block unattended-upgrades and the periodic apt timers so they cannot
+# silently rebuild the world overnight. Manual `apt upgrade` still works.
+mkdir -p /etc/apt/apt.conf.d
+cat > /etc/apt/apt.conf.d/99-autoweaver-no-auto-upgrade <<'EOF'
+APT::Periodic::Update-Package-Lists "0";
+APT::Periodic::Download-Upgradeable-Packages "0";
+APT::Periodic::AutocleanInterval "0";
+APT::Periodic::Unattended-Upgrade "0";
+EOF
+
+systemctl disable --now unattended-upgrades.service 2>/dev/null || true
+systemctl mask unattended-upgrades.service 2>/dev/null || true
+systemctl disable --now apt-daily.timer apt-daily-upgrade.timer 2>/dev/null || true
+systemctl mask apt-daily.timer apt-daily-upgrade.timer 2>/dev/null || true
+
 echo "[phase1] Installing base packages..."
 apt-get update
 apt-get install -y \

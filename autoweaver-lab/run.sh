@@ -54,7 +54,7 @@ case "$subcommand" in
   echo)
     # CLI echo uses JSON stdin; -T disables the pseudo-TTY so the pipe survives.
     echo '{"command":"echo","params":{"hi":1}}' \
-      | docker compose -f "$COMPOSE_FILE" run --rm -T train autoweaver-train
+      | docker compose -f "$COMPOSE_FILE" run --rm -T train python -m autoweaver_train.cli
     ;;
   train|evaluate)
     if [[ $# -lt 1 ]]; then
@@ -63,10 +63,10 @@ case "$subcommand" in
     fi
     config="$1"; shift
     docker compose -f "$COMPOSE_FILE" run --rm train \
-      autoweaver-train "$subcommand" -c "$config" "$@"
+      python -m autoweaver_train.cli "$subcommand" -c "$config" "$@"
     ;;
   *)
     docker compose -f "$COMPOSE_FILE" run --rm train \
-      autoweaver-train "$subcommand" "$@"
+      python -m autoweaver_train.cli "$subcommand" "$@"
     ;;
 esac

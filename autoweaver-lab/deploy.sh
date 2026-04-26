@@ -73,9 +73,9 @@ echo "[deploy] docker compose build"
 docker compose -f "$COMPOSE_FILE" build
 
 # ── Smoke test ─────────────────────────────────────────────────
-echo "[deploy] smoke test: autoweaver-train echo"
+echo "[deploy] smoke test: python -m autoweaver_train.cli echo"
 if echo '{"command":"echo","params":{"deploy":"ok"}}' \
-     | docker compose -f "$COMPOSE_FILE" run --rm -T train autoweaver-train \
+     | docker compose -f "$COMPOSE_FILE" run --rm -T train python -m autoweaver_train.cli \
      | grep -q '"status": "success"'; then
   echo "[deploy] smoke test passed"
 else
